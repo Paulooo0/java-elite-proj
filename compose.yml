@@ -1,0 +1,21 @@
+services:
+  db:
+    image: ${DB_IMAGE}
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - java_elite_proj
+    restart: on-failure
+
+networks:
+  java_elite_proj:
+    driver: bridge
+
+volumes:
+  db_data:
