@@ -17,7 +17,7 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
 
   List<Loan> findAll();
 
-  @Query("SELECT 1 FROM Loan l WHERE l.userId = :userId AND l.bookId = :bookId AND l.devolvedAt IS NULL")
+  @Query("SELECT 1 FROM Loan l WHERE l.userId = :userId AND l.bookId = :bookId AND l.takenAt IS NOT NULL AND l.devolvedAt IS NULL")
   Optional<Loan> findActiveLoan(@Param("userId") UUID userId, @Param("bookId") UUID bookid);
 
   List<Loan> findAllByDevolvedAtIsNull();

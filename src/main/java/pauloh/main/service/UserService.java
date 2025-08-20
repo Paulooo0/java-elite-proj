@@ -23,7 +23,7 @@ public class UserService {
     Users user = new Users(dto.name(), dto.email());
     repository.save(user);
 
-    UserResponseDTO res = new UserResponseDTO(user.getName(), user.getEmail());
+    UserResponseDTO res = new UserResponseDTO(user.getId(), user.getName(), user.getEmail());
     return res;
   }
 }

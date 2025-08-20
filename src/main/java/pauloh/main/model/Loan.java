@@ -11,9 +11,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Loan {
   @Id
   @GeneratedValue(generator = "UUID")
@@ -35,8 +37,7 @@ public class Loan {
   @Column(nullable = true)
   private Instant devolvedAt;
 
-  public Loan(UUID bookId, UUID userId, Instant expectedDevolution) {
-    this.id = UUID.randomUUID();
+  public Loan(UUID bookId, UUID userId) {
     setBookId(bookId);
     setUserId(userId);
     this.takenAt = Instant.now();

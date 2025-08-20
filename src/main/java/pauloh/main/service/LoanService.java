@@ -47,7 +47,7 @@ public class LoanService {
       throw new IllegalStateException("Book is inactive");
     }
 
-    Loan loan = new Loan(dto.bookId(), dto.userId(), dto.expectedDevolution());
+    Loan loan = new Loan(dto.bookId(), dto.userId());
 
     book.setStock(book.getStock() - 1);
 
@@ -141,7 +141,7 @@ public class LoanService {
 
   boolean isLoanActiveForUserAndBook(UUID userId, UUID bookId) {
     Optional<Loan> loan = repository.findActiveLoan(userId, bookId);
-    if (loan != null) {
+    if (loan.isPresent()) {
       throw new IllegalStateException("User has a active loan with this book");
     }
 

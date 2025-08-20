@@ -54,7 +54,7 @@ public class BookController {
         .exceptionally(ex -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
   }
 
-  @PutMapping("/{id}/estoque")
+  @PutMapping("/estoque/{id}")
   public CompletableFuture<ResponseEntity<BookResponseDto>> updateBookStock(@PathVariable UUID id,
       @RequestParam Integer quantity) {
     return service.updateBookStock(id, quantity)

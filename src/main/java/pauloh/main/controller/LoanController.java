@@ -32,12 +32,8 @@ public class LoanController {
 
   @PostMapping
   public ResponseEntity<LoanResponseDto> createLoan(@RequestBody CreateLoanDto dto) {
-    try {
-      LoanResponseDto res = service.createLoan(dto);
-      return ResponseEntity.status(HttpStatus.CREATED).body(res);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-    }
+    LoanResponseDto res = service.createLoan(dto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(res);
   }
 
   @GetMapping

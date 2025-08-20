@@ -7,9 +7,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Users {
   @Id
   @GeneratedValue(generator = "UUID")
@@ -23,7 +25,6 @@ public class Users {
   private String email;
 
   public Users(String name, String email) {
-    this.id = UUID.randomUUID();
     setName(name);
     setEmail(email);
   }

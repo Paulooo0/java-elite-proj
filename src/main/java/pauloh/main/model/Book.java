@@ -7,9 +7,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Book {
   @Id
   @GeneratedValue(generator = "UUID")
@@ -32,7 +34,6 @@ public class Book {
   private Boolean isActive = true;
 
   public Book(String isbn, String title, String author) {
-    this.id = UUID.randomUUID();
     setIsbn(isbn);
     setTitle(title);
     setAuthor(author);
