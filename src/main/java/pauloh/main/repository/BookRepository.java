@@ -1,5 +1,6 @@
 package pauloh.main.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
   Optional<Book> findById(UUID id);
 
   Optional<Book> findByTitle(String title);
+
+  List<Book> findAllByTitle(String title);
 }

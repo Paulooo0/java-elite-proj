@@ -1,5 +1,6 @@
 package pauloh.main.controller;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,17 +32,13 @@ public class BookController {
 
   @PostMapping
   public ResponseEntity<BookResponseDto> createBook(@RequestBody CreateBookDto dto) {
-    try {
-      BookResponseDto response = service.createBook(dto);
-      return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    } catch (IllegalArgumentException ex) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-    }
+    BookResponseDto res = service.createBook(dto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(res);
   }
 
   @GetMapping
-  public CompletableFuture<ResponseEntity<BookResponseDto>> getBookByTitle(@RequestParam String titulo) {
-    return service.getBookByTitle(titulo)
+  public CompletableFuture<ResponseEntity<List<BookResponseDto>>> getAllBooksByTitle(@RequestParam String title) {
+    return service.getAllBooksByTitle(title)
         .thenApply(ResponseEntity::ok)
         .exceptionally(ex -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
   }

@@ -1,5 +1,6 @@
 package pauloh.main.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,12 +22,7 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserDto dto) {
-    System.out.println(dto);
-    try {
-      UserResponseDTO response = service.createUser(dto);
-      return ResponseEntity.ok(response);
-    } catch (IllegalArgumentException ex) {
-      throw new IllegalArgumentException("Cannot create this user", ex);
-    }
+    UserResponseDTO res = service.createUser(dto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(res);
   }
 }

@@ -37,15 +37,15 @@ public class LoanController {
   }
 
   @GetMapping
-  public CompletableFuture<ResponseEntity<List<LoanResponseDto>>> getLoansByUserId(@RequestParam UUID usuarioId) {
-    return service.getLoansByUserId(usuarioId)
+  public CompletableFuture<ResponseEntity<List<LoanResponseDto>>> getLoansByUserId(@RequestParam UUID userId) {
+    return service.getLoansByUserId(userId)
         .thenApply(ResponseEntity::ok)
         .exceptionally(ex -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
   }
 
   @GetMapping("/multa")
-  public CompletableFuture<ResponseEntity<BigDecimal>> getFineByUserId(@RequestParam UUID emprestimoId) {
-    return service.getCurrentLoanDeadlinePenalty(emprestimoId)
+  public CompletableFuture<ResponseEntity<BigDecimal>> getCurrentLoanDeadlinePenalty(@RequestParam UUID loanId) {
+    return service.getCurrentLoanDeadlinePenalty(loanId)
         .thenApply(ResponseEntity::ok)
         .exceptionally(ex -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
   }

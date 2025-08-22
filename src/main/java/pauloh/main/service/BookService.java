@@ -1,5 +1,7 @@
 package pauloh.main.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -36,11 +38,22 @@ public class BookService {
   }
 
   @Async
-  public CompletableFuture<BookResponseDto> getBookByTitle(String title) {
-    Book book = repository.findByTitle(title).orElseThrow(() -> new EntityNotFoundException("Book not found"));
+  public CompletableFuture<List<BookResponseDto>> getAllBooksByTitle(String title) {
+    List<Book> books = repository.findAllByTitle(title);
 
-    BookResponseDto res = new BookResponseDto(
-        book.getId(), book.getIsbn(), book.getTitle(), book.getAuthor(), book.getStock());
+    List<BookResponseDto> res = new ArrayList<>();
+    books.forEach(book -> {
+      if (book.getIsActive()) {
+        res.add(
+            new BookResponseDto(
+                book.getId(), book.getIsbn(), book.getTitle(), book.getAuthor(), book.getStock()));
+      }
+    });
+
+    if (res.isEmpty()) {
+      throw new EntityNotFoundException("No books found with the specified title");
+    }
+
     return CompletableFuture.completedFuture(res);
   }
 
