@@ -25,8 +25,17 @@ public class BookService {
   }
 
   public BookResponseDto createBook(CreateBookDto dto) {
-    if (repository.existsByIsbn(dto.isbn())) {
+    Optional<Book> findedBook = repository.findByIsbn(dto.isbn());
+    if (findedBook.isPresent() && findedBook.get().getIsActive()) {
       throw new IllegalArgumentException("Book with this ISBN already exists");
+    } else if (findedBook.isPresent() && !findedBook.get().getIsActive()) {
+      Book book = findedBook.get();
+      book.setIsActive(true);
+      book.setTitle(dto.title());
+      book.setAuthor(dto.author());
+      repository.save(book);
+      return new BookResponseDto(
+          book.getId(), book.getIsbn(), book.getTitle(), book.getAuthor(), book.getStock());
     }
 
     Book book = new Book(dto.isbn(), dto.title(), dto.author());
