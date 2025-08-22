@@ -1,17 +1,10 @@
 ## Projeto Java Elite
 
 ### Requisitos
-##### Java 21
 ##### Docker
 ##### Makefile (opcional)
 
-### Como rodar
-
-#### Clona o repositório
-```bash
-git clone https://github.com/Paulooo0/java-elite-proj
-```
-#### Executando os comandos
+#### Como rodar + comandos
 
 Para facilitar o uso dos comandos, é utilizado `Makefile` (vem por padrão no Linux). Mas se você não possuir, pode simplesmente copiar os comandos em <a href="https://github.com/Paulooo0/java-elite-proj/blob/main/Makefile">Makefile</a>, e colar no seu terminal.
 
@@ -24,13 +17,13 @@ Para parar a aplicação, use `Ctrl+c`
 
 Outros comandos:
 ```bash
-make stop-db # Pausa o banco de dados
+make run-d
 
-make down-db # Remove o conteiner de banco de dados (não remove os dados em si)
+make stop # Pausa os containers
 
-make up-db   # Roda apenas o conteiner de banco de dados
+make down # Remove os conteiners (não remove os dados em si)
 
-make run-app # Roda apenas a aplicação Java
+make run-app # Roda apenas a aplicação Java (sem Docker)
 ```
 
 

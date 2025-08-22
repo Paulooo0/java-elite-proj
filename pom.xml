@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>pauloh</groupId>
 	<artifactId>java-elite-proj</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>java-elite-proj</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -102,6 +102,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<image>
+    				<builder>paketobuildpacks/builder:tiny</builder>
+  				</image>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
