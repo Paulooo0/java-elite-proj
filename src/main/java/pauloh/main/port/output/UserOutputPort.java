@@ -1,5 +1,7 @@
 package pauloh.main.port.output;
 
+import pauloh.main.core.domain.model.Users;
+
 public interface UserOutputPort {
-  // TODO
+  Users save(Users user);
 }

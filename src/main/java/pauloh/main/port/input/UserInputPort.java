@@ -1,5 +1,7 @@
 package pauloh.main.port.input;
 
+import pauloh.main.core.domain.model.Users;
+
 public interface UserInputPort {
-  // TODO
+  Users createUser(Users user);
 }
