@@ -1,32 +1,25 @@
 package pauloh.main.core.domain.model;
 
+import java.time.Instant;
 import java.util.UUID;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Entity
-@Getter
-@NoArgsConstructor
 public class Users {
-  @Id
-  @GeneratedValue(generator = "UUID")
-  @Column(nullable = false, updatable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
   private UUID id;
 
-  @Column(nullable = false)
   private String name;
 
-  @Column(unique = true, nullable = false)
   private String email;
 
-  public Users(String name, String email) {
+  private Instant createdAt;
+
+  private Instant updatedAt;
+
+  public Users(UUID id, String name, String email, Instant createdAt, Instant updatedAt) {
+    this.id = id;
     setName(name);
     setEmail(email);
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   public void setName(String name) {
@@ -47,4 +40,25 @@ public class Users {
 
     this.email = email;
   }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
 }
