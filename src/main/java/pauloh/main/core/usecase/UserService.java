@@ -2,9 +2,9 @@ package pauloh.main.core.usecase;
 
 import org.springframework.stereotype.Service;
 
-import pauloh.main.adapter.dto.user.CreateUserDto;
-import pauloh.main.adapter.dto.user.UserResponseDTO;
-import pauloh.main.adapter.repository.impl.UserRepository;
+import pauloh.main.adapter.input.dto.user.CreateUserDto;
+import pauloh.main.adapter.input.dto.user.UserResponseDTO;
+import pauloh.main.adapter.output.repository.impl.UserRepository;
 import pauloh.main.core.domain.model.Users;
 
 @Service

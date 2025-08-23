@@ -1,4 +1,4 @@
-package pauloh.main.adapter.dto.book;
+package pauloh.main.adapter.input.dto.book;
 
 import java.util.UUID;
 

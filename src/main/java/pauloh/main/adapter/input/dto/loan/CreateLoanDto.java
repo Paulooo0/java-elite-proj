@@ -1,4 +1,4 @@
-package pauloh.main.adapter.dto.loan;
+package pauloh.main.adapter.input.dto.loan;
 
 import java.util.UUID;
 

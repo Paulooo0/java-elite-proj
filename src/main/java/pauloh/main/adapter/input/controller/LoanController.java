@@ -1,4 +1,4 @@
-package pauloh.main.adapter.controller;
+package pauloh.main.adapter.input.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import pauloh.main.adapter.dto.loan.CreateLoanDto;
-import pauloh.main.adapter.dto.loan.LoanResponseDto;
-import pauloh.main.adapter.dto.loan.LoanedBooksWithUsersDto;
+import pauloh.main.adapter.input.dto.loan.CreateLoanDto;
+import pauloh.main.adapter.input.dto.loan.LoanResponseDto;
+import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersDto;
 import pauloh.main.core.usecase.LoanService;
 
 @RestController

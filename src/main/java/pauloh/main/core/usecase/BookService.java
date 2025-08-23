@@ -10,10 +10,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
-import pauloh.main.adapter.dto.book.BookResponseDto;
-import pauloh.main.adapter.dto.book.CreateBookDto;
-import pauloh.main.adapter.dto.book.UpdateBookDto;
-import pauloh.main.adapter.repository.impl.BookRepository;
+import pauloh.main.adapter.input.dto.book.BookResponseDto;
+import pauloh.main.adapter.input.dto.book.CreateBookDto;
+import pauloh.main.adapter.input.dto.book.UpdateBookDto;
+import pauloh.main.adapter.output.repository.impl.BookRepository;
 import pauloh.main.core.domain.model.Book;
 
 @Service

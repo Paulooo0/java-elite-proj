@@ -1,4 +1,4 @@
-package pauloh.main.adapter.controller;
+package pauloh.main.adapter.input.controller;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import pauloh.main.adapter.dto.book.BookResponseDto;
-import pauloh.main.adapter.dto.book.CreateBookDto;
-import pauloh.main.adapter.dto.book.UpdateBookDto;
+import pauloh.main.adapter.input.dto.book.BookResponseDto;
+import pauloh.main.adapter.input.dto.book.CreateBookDto;
+import pauloh.main.adapter.input.dto.book.UpdateBookDto;
 import pauloh.main.core.usecase.BookService;
 
 @RestController

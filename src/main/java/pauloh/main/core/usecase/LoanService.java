@@ -12,12 +12,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
-import pauloh.main.adapter.dto.loan.CreateLoanDto;
-import pauloh.main.adapter.dto.loan.LoanResponseDto;
-import pauloh.main.adapter.dto.loan.LoanedBooksWithUsersDto;
-import pauloh.main.adapter.repository.impl.BookRepository;
-import pauloh.main.adapter.repository.impl.LoanRepository;
-import pauloh.main.adapter.repository.impl.UserRepository;
+import pauloh.main.adapter.input.dto.loan.CreateLoanDto;
+import pauloh.main.adapter.input.dto.loan.LoanResponseDto;
+import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersDto;
+import pauloh.main.adapter.output.repository.impl.BookRepository;
+import pauloh.main.adapter.output.repository.impl.LoanRepository;
+import pauloh.main.adapter.output.repository.impl.UserRepository;
 import pauloh.main.core.domain.model.Book;
 import pauloh.main.core.domain.model.Loan;
 import pauloh.main.core.domain.model.Users;

@@ -1,4 +1,4 @@
-package pauloh.main.adapter.repository.impl;
+package pauloh.main.adapter.output.repository.impl;
 
 import java.util.List;
 import java.util.Optional;

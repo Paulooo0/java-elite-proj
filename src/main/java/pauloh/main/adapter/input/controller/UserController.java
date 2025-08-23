@@ -1,4 +1,4 @@
-package pauloh.main.adapter.controller;
+package pauloh.main.adapter.input.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import pauloh.main.adapter.dto.user.CreateUserDto;
-import pauloh.main.adapter.dto.user.UserResponseDTO;
+import pauloh.main.adapter.input.dto.user.CreateUserDto;
+import pauloh.main.adapter.input.dto.user.UserResponseDTO;
 import pauloh.main.core.usecase.UserService;
 
 @RestController
