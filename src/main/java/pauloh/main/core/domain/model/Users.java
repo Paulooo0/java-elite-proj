@@ -10,16 +10,17 @@ public class Users {
 
   private String email;
 
-  private Instant createdAt;
-
   private Instant updatedAt;
 
-  public Users(UUID id, String name, String email, Instant createdAt, Instant updatedAt) {
+  public Users(UUID id, String name, String email, Instant updatedAt) {
     this.id = id;
     setName(name);
     setEmail(email);
-    this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
   }
 
   public void setName(String name) {
@@ -53,12 +54,7 @@ public class Users {
     return email;
   }
 
-  public Instant getCreatedAt() {
-    return createdAt;
-  }
-
   public Instant getUpdatedAt() {
     return updatedAt;
   }
-
 }

@@ -2,28 +2,24 @@ package pauloh.main.core.usecase;
 
 import org.springframework.stereotype.Service;
 
-import pauloh.main.adapter.input.dto.user.CreateUserDto;
-import pauloh.main.adapter.input.dto.user.UserResponseDTO;
-import pauloh.main.adapter.output.repository.impl.UserRepository;
 import pauloh.main.core.domain.model.Users;
+import pauloh.main.port.input.UserInputPort;
+import pauloh.main.port.output.UserOutputPort;
 
 @Service
-public class UserService {
-  private final UserRepository repository;
+public class UserService implements UserInputPort {
+  private final UserOutputPort userOutputPort;
 
-  UserService(UserRepository repository) {
-    this.repository = repository;
+  UserService(UserOutputPort userOutputPort) {
+    this.userOutputPort = userOutputPort;
   }
 
-  public UserResponseDTO createUser(CreateUserDto dto) {
-    if (repository.existsByEmail(dto.email())) {
+  @Override
+  public Users createUser(Users user) {
+    if (userOutputPort.existsByEmail(user.getEmail())) {
       throw new IllegalArgumentException("User with this email already exists");
     }
 
-    Users user = new Users(dto.name(), dto.email());
-    repository.save(user);
-
-    UserResponseDTO res = new UserResponseDTO(user.getId(), user.getName(), user.getEmail());
-    return res;
+    return userOutputPort.save(user);
   }
 }

@@ -7,22 +7,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import pauloh.main.adapter.input.dto.user.CreateUserDto;
-import pauloh.main.adapter.input.dto.user.UserResponseDTO;
-import pauloh.main.core.usecase.UserService;
+import pauloh.main.adapter.input.controller.mapper.UserRestMapper;
+import pauloh.main.adapter.input.dto.user.CreateUserReq;
+import pauloh.main.core.domain.model.Users;
+import pauloh.main.port.input.UserInputPort;
 
 @RestController
 @RequestMapping("/usuarios")
 public class UserController {
-  private final UserService service;
+  private final UserInputPort userInputPort;
+  private final UserRestMapper mapper;
 
-  UserController(UserService service) {
-    this.service = service;
+  UserController(UserInputPort userInputPort, UserRestMapper mapper) {
+    this.userInputPort = userInputPort;
+    this.mapper = mapper;
   }
 
   @PostMapping
-  public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserDto dto) {
-    UserResponseDTO res = service.createUser(dto);
+  public ResponseEntity<Users> createUser(@RequestBody CreateUserReq req) {
+    Users user = mapper.toDomain(req);
+    Users res = userInputPort.createUser(user);
     return ResponseEntity.status(HttpStatus.CREATED).body(res);
   }
 }

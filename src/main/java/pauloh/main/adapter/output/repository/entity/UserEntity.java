@@ -14,10 +14,12 @@ public class UserEntity {
 
   private Instant updatedAt;
 
-  public UserEntity(String name, String email) {
-    this.id = UUID.randomUUID();
+  public UserEntity(UUID id, String name, String email, Instant createdAt, Instant updatedAt) {
+    this.id = id;
     this.name = name;
     this.email = email;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   public void setName(String name) {
