@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
 import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersReq;
 import pauloh.main.core.domain.model.Book;
@@ -15,7 +14,6 @@ import pauloh.main.port.input.LoanQueryPort;
 import pauloh.main.port.output.BookOutputPort;
 import pauloh.main.port.output.LoanOutputPort;
 
-@Service
 public class LoanService implements LoanInputPort {
   private final LoanOutputPort loanOutputPort;
   private final BookOutputPort bookOutputPort;

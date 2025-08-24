@@ -6,11 +6,10 @@ import pauloh.main.core.domain.model.Users;
 import pauloh.main.port.input.UserInputPort;
 import pauloh.main.port.output.UserOutputPort;
 
-@Service
 public class UserService implements UserInputPort {
   private final UserOutputPort userOutputPort;
 
-  UserService(UserOutputPort userOutputPort) {
+  public UserService(UserOutputPort userOutputPort) {
     this.userOutputPort = userOutputPort;
   }
 

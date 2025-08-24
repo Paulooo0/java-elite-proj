@@ -3,17 +3,15 @@ package pauloh.main.core.usecase;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
 import pauloh.main.core.domain.model.Book;
 import pauloh.main.port.input.BookInputPort;
 import pauloh.main.port.output.BookOutputPort;
 
-@Service
 public class BookService implements BookInputPort {
   private final BookOutputPort bookInputPort;
 
-  BookService(BookOutputPort bookInputPort) {
+  public BookService(BookOutputPort bookInputPort) {
     this.bookInputPort = bookInputPort;
   }
 
