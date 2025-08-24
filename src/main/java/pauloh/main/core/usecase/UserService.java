@@ -1,7 +1,5 @@
 package pauloh.main.core.usecase;
 
-import org.springframework.stereotype.Service;
-
 import pauloh.main.core.domain.model.Users;
 import pauloh.main.port.input.UserInputPort;
 import pauloh.main.port.output.UserOutputPort;
