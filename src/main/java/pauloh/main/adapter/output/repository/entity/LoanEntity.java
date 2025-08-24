@@ -1,10 +1,10 @@
-package pauloh.main.core.domain.model;
+package pauloh.main.adapter.output.repository.entity;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-public class Loan {
+public class LoanEntity {
   private UUID id;
 
   private UUID bookId;
@@ -17,14 +17,19 @@ public class Loan {
 
   private Instant devolvedAt;
 
+  private Instant createdAt;
+
   private Instant updatedAt;
 
-  public Loan(UUID id, UUID bookId, UUID userId, Instant expectedDevolution,
-      Instant devolvedAt) {
+  public LoanEntity(UUID id, UUID bookId, UUID userId, Instant takenAt, Instant expectedDevolution,
+      Instant devolvedAt, Instant updatedAt) {
     this.id = id;
     setBookId(bookId);
     setUserId(userId);
+    this.takenAt = takenAt;
     setExpectedDevolution(takenAt.plus(7, ChronoUnit.DAYS));
+    this.devolvedAt = devolvedAt;
+    this.updatedAt = updatedAt;
   }
 
   public void setId(UUID id) {
@@ -63,6 +68,14 @@ public class Loan {
     this.devolvedAt = devolvedAt;
   }
 
+  public void setTakenAt(Instant takenAt) {
+    this.takenAt = takenAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
   public UUID getId() {
     return id;
   }
@@ -89,5 +102,9 @@ public class Loan {
 
   public Instant getUpdatedAt() {
     return updatedAt;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
   }
 }

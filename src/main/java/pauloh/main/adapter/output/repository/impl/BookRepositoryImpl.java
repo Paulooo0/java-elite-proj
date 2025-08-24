@@ -39,7 +39,7 @@ public class BookRepositoryImpl implements BookOutputPort {
             stock = EXCLUDED.stock,
             is_active = EXCLUDED.is_active,
             updated_at = NOW()
-        RETURNING id, email, name
+        RETURNING id, isbn, title, author, stock, updated_at
         """;
 
     BookEntity persist = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new BookEntity(

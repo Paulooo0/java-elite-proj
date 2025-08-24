@@ -18,12 +18,11 @@ public class Book {
 
   private Instant updatedAt;
 
-  public Book(UUID id, String isbn, String title, String author, Instant updatedAt) {
+  public Book(UUID id, String isbn, String title, String author) {
     this.id = id;
     setIsbn(isbn);
     setTitle(title);
     setAuthor(author);
-    this.updatedAt = updatedAt;
   }
 
   public void setId(UUID id) {

@@ -2,101 +2,64 @@ package pauloh.main.core.usecase;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
-import pauloh.main.adapter.input.dto.loan.CreateLoanDto;
-import pauloh.main.adapter.input.dto.loan.LoanResponseDto;
-import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersDto;
-import pauloh.main.adapter.output.repository.impl.BookRepository;
-import pauloh.main.adapter.output.repository.impl.LoanRepository;
-import pauloh.main.adapter.output.repository.impl.UserRepository;
+import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersReq;
 import pauloh.main.core.domain.model.Book;
 import pauloh.main.core.domain.model.Loan;
-import pauloh.main.core.domain.model.Users;
+import pauloh.main.port.input.LoanInputPort;
+import pauloh.main.port.input.LoanQueryPort;
+import pauloh.main.port.output.BookOutputPort;
+import pauloh.main.port.output.LoanOutputPort;
 
 @Service
-public class LoanService {
-  private final LoanRepository repository;
-  private final BookRepository bookRepository;
-  private final UserRepository userRepository;
+public class LoanService implements LoanInputPort {
+  private final LoanOutputPort loanOutputPort;
+  private final BookOutputPort bookOutputPort;
+  private final LoanQueryPort loanQueryPort;
 
-  public LoanService(LoanRepository repository, BookRepository bookRepository, UserRepository userRepository) {
-    this.repository = repository;
-    this.bookRepository = bookRepository;
-    this.userRepository = userRepository;
+  public LoanService(LoanOutputPort loanOutputPort, BookOutputPort bookOutputPort,
+      LoanQueryPort loanQueryPort) {
+    this.loanOutputPort = loanOutputPort;
+    this.bookOutputPort = bookOutputPort;
+    this.loanQueryPort = loanQueryPort;
   }
 
-  public LoanResponseDto createLoan(CreateLoanDto dto) {
-    if (isLoanActiveForUserAndBook(dto.userId(), dto.bookId())) {
+  public Loan createLoan(Loan loan) {
+    if (isLoanActiveForUserAndBook(loan.getUserId(), loan.getBookId())) {
       throw new IllegalStateException("User already has an active loan with this book");
     }
 
-    Book book = bookRepository.findById(dto.bookId())
-        .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+    Book book = bookOutputPort.findById(loan.getBookId())
+        .orElseThrow(() -> new IllegalArgumentException("Book not found"));
     if (book.getStock() == 0) {
       throw new IllegalStateException("Book is out of stock");
     } else if (book.getIsActive() != true) {
       throw new IllegalStateException("Book is inactive");
     }
 
-    Loan loan = new Loan(dto.bookId(), dto.userId());
-
     book.setStock(book.getStock() - 1);
 
-    repository.save(loan);
-    bookRepository.save(book);
-
-    LoanResponseDto res = new LoanResponseDto(
-        loan.getId(), loan.getTakenAt(), loan.getExpectedDevolution(), loan.getDevolvedAt());
-    return res;
+    bookOutputPort.save(book);
+    return loanOutputPort.save(loan);
   }
 
-  @Async
-  public CompletableFuture<List<LoanResponseDto>> getLoansByUserId(UUID id) {
-    List<Loan> loans = repository.findAllByUserId(id);
+  public List<Loan> getLoansByUserId(UUID id) {
+    List<Loan> loans = loanOutputPort.findAllByUserId(id);
 
-    List<LoanResponseDto> res = new ArrayList<>();
-    loans.forEach(loan -> {
-      res.add(new LoanResponseDto(
-          loan.getId(), loan.getTakenAt(), loan.getExpectedDevolution(), loan.getDevolvedAt()));
-    });
-
-    return CompletableFuture.completedFuture(res);
+    return loans;
   }
 
-  @Async
-  public CompletableFuture<List<LoanedBooksWithUsersDto>> getAllActiveLoans() {
-    List<Loan> loans = repository.findAllByDevolvedAtIsNull();
-
-    List<LoanedBooksWithUsersDto> res = new ArrayList<>();
-    loans.forEach(loan -> {
-      Book book = bookRepository.findById(loan.getBookId())
-          .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-      String bookTitle = book.getTitle();
-      String bookAuthor = book.getAuthor();
-
-      Users user = userRepository.findById(loan.getUserId())
-          .orElseThrow(() -> new EntityNotFoundException("User not found"));
-      String userName = user.getName();
-      String userEmail = user.getEmail();
-
-      res.add(new LoanedBooksWithUsersDto(bookTitle, bookAuthor, userName, userEmail));
-    });
-
-    return CompletableFuture.completedFuture(res);
+  public List<LoanedBooksWithUsersReq> getAllActiveLoans() {
+    List<LoanedBooksWithUsersReq> activeLoands = loanQueryPort.getAllActiveLoans();
+    return activeLoands;
   }
 
-  @Async
-  public CompletableFuture<BigDecimal> getCurrentLoanDeadlinePenalty(UUID id) {
-    Loan loan = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Loan not found"));
+  public BigDecimal getCurrentLoanDeadlinePenalty(UUID id) {
+    Loan loan = loanOutputPort.findById(id).orElseThrow(() -> new IllegalArgumentException("Loan not found"));
 
     if (loan.getDevolvedAt() != null) {
       throw new IllegalStateException("Loan already devolved");
@@ -106,41 +69,36 @@ public class LoanService {
     Instant expectedDevolution = loan.getExpectedDevolution();
 
     if (now.isBefore(expectedDevolution)) {
-      return CompletableFuture.completedFuture(new BigDecimal("0.00"));
+      return new BigDecimal("0.00");
     }
 
     long daysLate = java.time.Duration.between(expectedDevolution, now).toDays();
     BigDecimal penaltyPerDay = new BigDecimal("2.00");
     BigDecimal penalty = penaltyPerDay.multiply(BigDecimal.valueOf(daysLate));
 
-    return CompletableFuture.completedFuture(penalty);
+    return penalty;
   }
 
-  @Async
-  public CompletableFuture<LoanResponseDto> registerDevolution(UUID id) {
-    Loan loan = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Loan not found"));
+  public Loan registerDevolution(UUID id) {
+    Loan loan = loanOutputPort.findById(id).orElseThrow(() -> new IllegalArgumentException("Loan not found"));
 
     if (loan.getDevolvedAt() != null) {
       throw new IllegalStateException("Loan already devolved");
     }
 
-    Book book = bookRepository.findById(loan.getBookId())
-        .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+    Book book = bookOutputPort.findById(loan.getBookId())
+        .orElseThrow(() -> new IllegalArgumentException("Book not found"));
 
     book.setStock(book.getStock() + 1);
 
     loan.setDevolvedAt(Instant.now());
 
-    repository.save(loan);
-    bookRepository.save(book);
-
-    LoanResponseDto res = new LoanResponseDto(
-        loan.getId(), loan.getTakenAt(), loan.getExpectedDevolution(), loan.getDevolvedAt());
-    return CompletableFuture.completedFuture(res);
+    bookOutputPort.save(book);
+    return loanOutputPort.save(loan);
   }
 
   boolean isLoanActiveForUserAndBook(UUID userId, UUID bookId) {
-    Optional<Loan> loan = repository.findActiveLoan(userId, bookId);
+    Optional<Loan> loan = loanOutputPort.findActiveLoan(userId, bookId);
     if (loan.isPresent()) {
       throw new IllegalStateException("User has a active loan with this book");
     }

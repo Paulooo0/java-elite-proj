@@ -12,11 +12,10 @@ public class Users {
 
   private Instant updatedAt;
 
-  public Users(UUID id, String name, String email, Instant updatedAt) {
+  public Users(UUID id, String name, String email) {
     this.id = id;
     setName(name);
     setEmail(email);
-    this.updatedAt = updatedAt;
   }
 
   public void setId(UUID id) {

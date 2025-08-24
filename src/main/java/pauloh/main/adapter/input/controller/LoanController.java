@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,51 +17,63 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import pauloh.main.adapter.input.dto.loan.CreateLoanDto;
-import pauloh.main.adapter.input.dto.loan.LoanResponseDto;
-import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersDto;
-import pauloh.main.core.usecase.LoanService;
+import pauloh.main.adapter.input.controller.mapper.LoanRestMapper;
+import pauloh.main.adapter.input.dto.loan.LoanReq;
+import pauloh.main.adapter.input.dto.loan.LoanRes;
+import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersReq;
+import pauloh.main.core.domain.model.Loan;
+import pauloh.main.port.input.LoanInputPort;
+import pauloh.main.port.input.LoanQueryPort;
 
 @RestController
 @RequestMapping("/emprestimos")
 public class LoanController {
-  private final LoanService service;
+  private final LoanInputPort loanInputPort;
+  private final LoanQueryPort loanQueryPort;
+  private final LoanRestMapper mapper;
 
-  public LoanController(LoanService service) {
-    this.service = service;
+  public LoanController(LoanInputPort loanInputPort, LoanRestMapper mapper, LoanQueryPort loanQueryPort) {
+    this.loanInputPort = loanInputPort;
+    this.mapper = mapper;
+    this.loanQueryPort = loanQueryPort;
   }
 
   @PostMapping
-  public ResponseEntity<LoanResponseDto> createLoan(@RequestBody CreateLoanDto dto) {
-    LoanResponseDto res = service.createLoan(dto);
+  public ResponseEntity<LoanRes> createLoan(@RequestBody LoanReq req) {
+    Loan loan = mapper.toDomain(req);
+    Loan created = loanInputPort.createLoan(loan);
+    LoanRes res = mapper.toRespose(created);
     return ResponseEntity.status(HttpStatus.CREATED).body(res);
   }
 
+  @Async
   @GetMapping
-  public CompletableFuture<ResponseEntity<List<LoanResponseDto>>> getLoansByUserId(@RequestParam UUID userId) {
-    return service.getLoansByUserId(userId)
-        .thenApply(ResponseEntity::ok)
-        .exceptionally(ex -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+  public CompletableFuture<ResponseEntity<List<LoanRes>>> getLoansByUserId(@RequestParam UUID userId) {
+    List<LoanRes> loans = loanInputPort.getLoansByUserId(userId).stream()
+        .map(mapper::toRespose)
+        .toList();
+    return CompletableFuture.completedFuture(ResponseEntity.ok(loans));
   }
 
+  @Async
   @GetMapping("/multa")
   public CompletableFuture<ResponseEntity<BigDecimal>> getCurrentLoanDeadlinePenalty(@RequestParam UUID loanId) {
-    return service.getCurrentLoanDeadlinePenalty(loanId)
-        .thenApply(ResponseEntity::ok)
-        .exceptionally(ex -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    BigDecimal penalty = loanInputPort.getCurrentLoanDeadlinePenalty(loanId);
+    return CompletableFuture.completedFuture(ResponseEntity.ok(penalty));
   }
 
+  @Async
   @GetMapping("/ativos")
-  public CompletableFuture<ResponseEntity<List<LoanedBooksWithUsersDto>>> getAllActiveLoans() {
-    return service.getAllActiveLoans()
-        .thenApply(ResponseEntity::ok)
-        .exceptionally(ex -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+  public CompletableFuture<ResponseEntity<List<LoanedBooksWithUsersReq>>> getAllActiveLoans() {
+    List<LoanedBooksWithUsersReq> loans = loanQueryPort.getAllActiveLoans();
+    return CompletableFuture.completedFuture(ResponseEntity.ok(loans));
   }
 
+  @Async
   @PutMapping("/{id}")
-  public CompletableFuture<ResponseEntity<LoanResponseDto>> registerDevolution(@PathVariable UUID id) {
-    return service.registerDevolution(id)
-        .thenApply(ResponseEntity::ok)
-        .exceptionally(ex -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+  public CompletableFuture<ResponseEntity<LoanRes>> registerDevolution(@PathVariable UUID id) {
+    Loan loan = loanInputPort.registerDevolution(id);
+    LoanRes res = mapper.toRespose(loan);
+    return CompletableFuture.completedFuture(ResponseEntity.ok(res));
   }
 }

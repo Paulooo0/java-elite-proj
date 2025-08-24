@@ -12,9 +12,9 @@ public class BookEntity {
 
   private String author;
 
-  private Integer stock = 0;
+  private Integer stock;
 
-  private Boolean isActive = true;
+  private Boolean isActive;
 
   private Instant createdAt = Instant.now();
 
@@ -73,10 +73,6 @@ public class BookEntity {
     }
 
     this.isActive = isActive;
-  }
-
-  public void setCreatedAt(Instant createdAt) {
-    this.createdAt = createdAt;
   }
 
   public void setUpdatedAt(Instant updatedAt) {

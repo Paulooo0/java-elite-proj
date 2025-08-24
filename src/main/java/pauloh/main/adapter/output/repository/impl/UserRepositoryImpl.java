@@ -2,6 +2,7 @@ package pauloh.main.adapter.output.repository.impl;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,7 +52,7 @@ public class UserRepositoryImpl implements UserOutputPort {
   }
 
   @Override
-  public Users findById(UUID id) {
+  public Optional<Users> findById(UUID id) {
     String sql = """
         SELECT id, name, email, created_at, updated_at
         FROM users
@@ -66,7 +67,7 @@ public class UserRepositoryImpl implements UserOutputPort {
           rs.getTimestamp("created_at").toInstant(),
           rs.getTimestamp("updated_at").toInstant()), id);
 
-      return mapper.toDomain(entity);
+      return Optional.ofNullable(mapper.toDomain(entity));
     } catch (Exception e) {
       throw new IllegalArgumentException("User not found with id: " + id, e);
     }
