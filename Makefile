@@ -15,6 +15,9 @@ run-app:
 
 	./mvnw spring-boot:run
 
+run-db:
+	docker compose up db -d
+
 stop:
 	docker compose stop
 
