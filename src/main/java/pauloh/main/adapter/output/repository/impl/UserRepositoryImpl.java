@@ -44,7 +44,8 @@ public class UserRepositoryImpl implements UserOutputPort {
         rs.getString("email"),
         rs.getString("name"),
         rs.getTimestamp("created_at").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), entity.getId(), entity.getEmail(), entity.getName());
+        rs.getTimestamp("updated_at").toInstant()), entity.getId(), entity.getEmail(), entity.getName(),
+        entity.getUpdatedAt());
 
     return mapper.toDomain(persist);
   }

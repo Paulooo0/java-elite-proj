@@ -1,16 +1,14 @@
-package pauloh.main.adapter.output.repository.impl;
+package pauloh.main.port.output;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import pauloh.main.core.domain.model.Book;
 
-@Repository
-public interface BookRepository extends JpaRepository<Book, UUID> {
+public interface BookOutputPort {
+  Book save(Book book);
+
   boolean existsByIsbn(String isbn);
 
   Optional<Book> findById(UUID id);

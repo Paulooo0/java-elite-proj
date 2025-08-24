@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pauloh.main.adapter.input.controller.mapper.UserRestMapper;
 import pauloh.main.adapter.input.dto.user.CreateUserReq;
+import pauloh.main.adapter.input.dto.user.UserRes;
 import pauloh.main.core.domain.model.Users;
 import pauloh.main.port.input.UserInputPort;
 
@@ -24,9 +25,10 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<Users> createUser(@RequestBody CreateUserReq req) {
+  public ResponseEntity<UserRes> createUser(@RequestBody CreateUserReq req) {
     Users user = mapper.toDomain(req);
-    Users res = userInputPort.createUser(user);
+    Users created = userInputPort.createUser(user);
+    UserRes res = mapper.toResponse(created);
     return ResponseEntity.status(HttpStatus.CREATED).body(res);
   }
 }

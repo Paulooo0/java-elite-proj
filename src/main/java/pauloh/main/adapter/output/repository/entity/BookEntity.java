@@ -1,9 +1,9 @@
-package pauloh.main.core.domain.model;
+package pauloh.main.adapter.output.repository.entity;
 
 import java.time.Instant;
 import java.util.UUID;
 
-public class Book {
+public class BookEntity {
   private UUID id;
 
   private String isbn;
@@ -16,18 +16,20 @@ public class Book {
 
   private Boolean isActive = true;
 
+  private Instant createdAt = Instant.now();
+
   private Instant updatedAt;
 
-  public Book(UUID id, String isbn, String title, String author, Instant updatedAt) {
+  public BookEntity(UUID id, String isbn, String title, String author, Integer stock, Boolean isActive,
+      Instant createdAt, Instant updatedAt) {
     this.id = id;
-    setIsbn(isbn);
-    setTitle(title);
-    setAuthor(author);
+    this.isbn = isbn;
+    this.title = title;
+    this.author = author;
+    this.stock = stock;
+    this.isActive = isActive;
+    this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
   }
 
   public void setIsbn(String isbn) {
@@ -73,6 +75,10 @@ public class Book {
     this.isActive = isActive;
   }
 
+  public void setCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+  }
+
   public void setUpdatedAt(Instant updatedAt) {
     this.updatedAt = updatedAt;
   }
@@ -99,6 +105,10 @@ public class Book {
 
   public Boolean getIsActive() {
     return isActive;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
   }
 
   public Instant getUpdatedAt() {
