@@ -4,9 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import pauloh.main.core.usecase.LoanService;
-import pauloh.main.port.input.LoanQueryPort;
 import pauloh.main.port.output.BookOutputPort;
 import pauloh.main.port.output.LoanOutputPort;
+import pauloh.main.port.output.LoanQueryPort;
 
 @Configuration
 public class LoanBeanConfig {

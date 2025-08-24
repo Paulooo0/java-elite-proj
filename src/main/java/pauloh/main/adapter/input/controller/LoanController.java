@@ -23,7 +23,7 @@ import pauloh.main.adapter.input.dto.loan.LoanRes;
 import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersReq;
 import pauloh.main.core.domain.model.Loan;
 import pauloh.main.port.input.LoanInputPort;
-import pauloh.main.port.input.LoanQueryPort;
+import pauloh.main.port.output.LoanQueryPort;
 
 @RestController
 @RequestMapping("/emprestimos")

@@ -11,8 +11,8 @@ import pauloh.main.adapter.input.dto.loan.LoanedBooksWithUsersReq;
 import pauloh.main.adapter.output.repository.entity.LoanEntity;
 import pauloh.main.adapter.output.repository.mapper.LoanPersistenceMapper;
 import pauloh.main.core.domain.model.Loan;
-import pauloh.main.port.input.LoanQueryPort;
 import pauloh.main.port.output.LoanOutputPort;
+import pauloh.main.port.output.LoanQueryPort;
 
 @Repository
 public class LoanRepositoryImpl implements LoanOutputPort, LoanQueryPort {

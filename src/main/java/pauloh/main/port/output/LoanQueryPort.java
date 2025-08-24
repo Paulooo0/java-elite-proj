@@ -1,4 +1,4 @@
-package pauloh.main.port.input;
+package pauloh.main.port.output;
 
 import java.util.List;
 
