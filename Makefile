@@ -13,10 +13,11 @@ run-app:
 	export DB_IMAGE
 	export APP_PORT
 
+	./mvnw clean package -DskipTests
 	./mvnw spring-boot:run
 
 run-db:
-	docker compose up db -d
+	docker compose up db pgadmin -d
 
 stop:
 	docker compose stop
