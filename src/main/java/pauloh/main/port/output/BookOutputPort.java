@@ -13,8 +13,6 @@ public interface BookOutputPort {
 
   Optional<Book> findById(UUID id);
 
-  Optional<Book> findByTitle(String title);
-
   Optional<Book> findByIsbn(String isbn);
 
   List<Book> findAllByTitle(String title);

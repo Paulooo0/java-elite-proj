@@ -24,102 +24,63 @@ public class BookRepositoryImpl implements BookOutputPort {
 
   @Override
   public Book save(Book book) {
-    UUID id = book.getId() != null ? book.getId() : UUID.randomUUID();
-    book.setId(id);
-
     BookEntity entity = mapper.toEntity(book);
 
-    String sql = """
-        INSERT INTO users (id, isbn, title, author, stock, is_active, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
-        ON CONFLICT (id) DO UPDATE
-        SET isbn = EXCLUDED.isbn,
-            title = EXCLUDED.title,
-            author = EXCLUDED.author,
-            stock = EXCLUDED.stock,
-            is_active = EXCLUDED.is_active,
-            updated_at = NOW()
-        RETURNING id, isbn, title, author, stock, updated_at
-        """;
+    String sql = "SELECT 1 FROM fn_upsert_book(?, ?, ?, ?)";
 
-    BookEntity persist = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new BookEntity(
-        rs.getObject("id", UUID.class),
-        rs.getString("isbn"),
-        rs.getString("title"),
-        rs.getString("author"),
-        rs.getInt("stock"),
-        rs.getBoolean("is_active"),
-        rs.getTimestamp("created_at").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), entity.getId(), entity.getIsbn(), entity.getAuthor(),
-        entity.getStock(), entity.getUpdatedAt());
+    BookEntity persisted = jdbcTempl.queryForObject(
+        sql,
+        (rs, rowNum) -> new BookEntity(
+            rs.getObject("id", UUID.class),
+            rs.getString("isbn"),
+            rs.getString("title"),
+            rs.getString("author"),
+            rs.getInt("stock"),
+            rs.getBoolean("is_active"),
+            rs.getTimestamp("created_at").toInstant(),
+            rs.getTimestamp("updated_at").toInstant()),
+        entity.getIsbn(),
+        entity.getTitle(),
+        entity.getAuthor(),
+        entity.getStock());
 
-    return mapper.toDomain(persist);
+    return mapper.toDomain(persisted);
   }
 
   @Override
   public boolean existsByIsbn(String isbn) {
-    String sql = "SELECT COUNT(*) FROM books WHERE isbn = ?";
-    Integer count = jdbcTempl.queryForObject(sql, Integer.class, isbn);
-    return count != null && count > 0;
+    String sql = "SELECT fn_exists_book_by_isbn(?)";
+    Boolean exists = jdbcTempl.queryForObject(sql, Boolean.class, isbn);
+    return Boolean.TRUE.equals(exists);
   }
 
   @Override
   public Optional<Book> findById(UUID id) {
-    String sql = """
-        SELECT id, isbn, title, author, stock, is_active, created_at, updated_at
-        FROM books
-        WHERE id = ?
-        """;
+    String sql = "SELECT 1 FROM fn_find_book_by_id(?)";
 
     try {
-      BookEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new BookEntity(
-          rs.getObject("id", UUID.class),
-          rs.getString("isbn"),
-          rs.getString("title"),
-          rs.getString("author"),
-          rs.getInt("stock"),
-          rs.getBoolean("is_active"),
-          rs.getTimestamp("created_at").toInstant(),
-          rs.getTimestamp("updated_at").toInstant()), id);
+      BookEntity entity = jdbcTempl.queryForObject(
+          sql,
+          (rs, rowNum) -> new BookEntity(
+              rs.getObject("id", UUID.class),
+              rs.getString("isbn"),
+              rs.getString("title"),
+              rs.getString("author"),
+              rs.getInt("stock"),
+              rs.getBoolean("is_active"),
+              rs.getTimestamp("created_at").toInstant(),
+              rs.getTimestamp("updated_at").toInstant()),
+          id);
 
       return Optional.ofNullable(mapper.toDomain(entity));
     } catch (Exception e) {
-      throw new IllegalArgumentException("Book not found with id: " + id, e);
-    }
-  }
-
-  @Override
-  public Optional<Book> findByTitle(String title) {
-    String sql = """
-        SELECT id, isbn, title, author, stock, is_active, created_at, updated_at
-        FROM books
-        WHERE title = ?
-        """;
-
-    try {
-      BookEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new BookEntity(
-          rs.getObject("id", UUID.class),
-          rs.getString("isbn"),
-          rs.getString("title"),
-          rs.getString("author"),
-          rs.getInt("stock"),
-          rs.getBoolean("is_active"),
-          rs.getTimestamp("created_at").toInstant(),
-          rs.getTimestamp("updated_at").toInstant()), title);
-
-      return Optional.ofNullable(mapper.toDomain(entity));
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Book not found with title: " + title, e);
+      return Optional.empty();
     }
   }
 
   @Override
   public Optional<Book> findByIsbn(String isbn) {
-    String sql = """
-        SELECT id, isbn, title, author, stock, is_active, created_at, updated_at
-        FROM books
-        WHERE isbn = ?
-        """;
+    String sql = "SELECT 1 FROM fn_find_book_by_isbn(?)";
 
     try {
       BookEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new BookEntity(
@@ -140,11 +101,7 @@ public class BookRepositoryImpl implements BookOutputPort {
 
   @Override
   public List<Book> findAllByTitle(String title) {
-    String sql = """
-        SELECT id, isbn, title, author, stock, is_active, created_at, updated_at
-        FROM books
-        WHERE title = ?
-        """;
+    String sql = "SELECT * FROM fn_find_books_by_title(?)";
 
     List<BookEntity> entities = jdbcTempl.query(sql, (rs, rowNum) -> new BookEntity(
         rs.getObject("id", UUID.class),
