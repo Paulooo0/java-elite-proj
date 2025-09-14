@@ -1,6 +1,5 @@
 package pauloh.main.adapter.output.repository.impl;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,77 +24,58 @@ public class UserRepositoryImpl implements UserOutputPort {
 
   @Override
   public Users save(Users user) {
-    UUID id = user.getId() != null ? user.getId() : UUID.randomUUID();
-    user.setId(id);
+    String sql = "SELECT * FROM fn_upsert_user(?, ?, ?)";
 
-    UserEntity entity = mapper.toEntity(user);
-
-    String sql = """
-        INSERT INTO users (id, email, name, created_at)
-        VALUES (?, ?, ?, NOW())
-        ON CONFLICT (id) DO UPDATE
-        SET email = EXCLUDED.email,
-            name = EXCLUDED.name,
-            updated_at = NOW()
-        RETURNING id, email, name
-        """;
-
-    UserEntity persist = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new UserEntity(
+    UserEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new UserEntity(
         rs.getObject("id", UUID.class),
-        rs.getString("email"),
         rs.getString("name"),
+        rs.getString("email"),
         rs.getTimestamp("created_at").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), entity.getId(), entity.getEmail(), entity.getName(),
-        entity.getUpdatedAt());
+        rs.getTimestamp("updated_at").toInstant()),
+        user.getId(), user.getName(), user.getEmail());
 
-    return mapper.toDomain(persist);
+    return mapper.toDomain(entity);
   }
 
   @Override
   public Optional<Users> findById(UUID id) {
-    String sql = """
-        SELECT id, name, email, created_at, updated_at
-        FROM users
-        WHERE id = ?
-        """;
+    String sql = "SELECT * FROM fn_find_user_by_id(?)";
 
     try {
       UserEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new UserEntity(
           rs.getObject("id", UUID.class),
           rs.getString("name"),
           rs.getString("email"),
-          rs.getTimestamp("created_at").toInstant(),
-          rs.getTimestamp("updated_at").toInstant()), id);
+          rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toInstant() : null,
+          rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toInstant() : null), id);
 
       return Optional.ofNullable(mapper.toDomain(entity));
     } catch (Exception e) {
-      throw new IllegalArgumentException("User not found with id: " + id, e);
+      return Optional.empty();
     }
   }
 
   @Override
   public List<Users> findAll() {
-    String sql = """
-        SELECT id, email, name, created_at, updated_at
-        FROM users
-        """;
+    String sql = "SELECT * FROM fn_get_all_users()";
 
-    return jdbcTempl.query(sql, (rs, rowNum) -> new UserEntity(
+    List<UserEntity> entities = jdbcTempl.query(sql, (rs, rowNum) -> new UserEntity(
         rs.getObject("id", UUID.class),
-        rs.getString("email"),
         rs.getString("name"),
-        rs.getObject("created_at", Instant.class),
-        rs.getObject("updated_at", Instant.class)))
-        .stream()
+        rs.getString("email"),
+        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toInstant() : null,
+        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toInstant() : null));
+
+    return entities.stream()
         .map(mapper::toDomain)
         .toList();
   }
 
   @Override
   public boolean existsByEmail(String email) {
-    String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
-    Integer count = jdbcTempl.queryForObject(sql, Integer.class);
-    return count != null && count > 0;
+    String sql = "SELECT fn_exists_user_by_email(?)";
+    Boolean exists = jdbcTempl.queryForObject(sql, Boolean.class, email);
+    return Boolean.TRUE.equals(exists);
   }
 
 }
