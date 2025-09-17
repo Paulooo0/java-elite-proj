@@ -26,72 +26,67 @@ public class LoanRepositoryImpl implements LoanOutputPort, LoanQueryPort {
 
   @Override
   public Loan save(Loan loan) {
-    UUID id = loan.getId() != null ? loan.getId() : UUID.randomUUID();
-    loan.setId(id);
-
     LoanEntity entity = mapper.toEntity(loan);
 
-    String sql = """
-        INSERT INTO users (id, bookId, userId, takenAt, expectedDevolution, devolvedAt, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
-        ON CONFLICT (id) DO UPDATE
-        SET bookId = EXCLUDED.bookId,
-            userId = EXCLUDED.userId,
-            takenAt = EXCLUDED.takenAt,
-            expectedDevolution = EXCLUDED.expectedDevolution,
-            devolvedAt = EXCLUDED.devolvedAt,
-            updated_at = NOW()
-        RETURNING id, bookId, userId, takenAt, expectedDevolution, devolvedAt, updated_at
-        """;
+    String sql = "SELECT * FROM fn_upsert_loan(?, ?, ?, ?, ?)";
 
     LoanEntity persist = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new LoanEntity(
         rs.getObject("id", UUID.class),
-        rs.getObject("bookId", UUID.class),
-        rs.getObject("userId", UUID.class),
-        rs.getTimestamp("takenAt").toInstant(),
-        rs.getTimestamp("expectedDevolution").toInstant(),
-        rs.getTimestamp("devolvedAt").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), entity.getId(), entity.getBookId(),
-        entity.getUserId(), entity.getTakenAt(), entity.getExpectedDevolution(), entity.getDevolvedAt(),
-        entity.getUpdatedAt());
+        rs.getObject("book_id", UUID.class),
+        rs.getObject("user_id", UUID.class),
+        rs.getTimestamp("taken_at").toInstant(),
+        rs.getTimestamp("expected_devolution").toInstant(),
+        rs.getTimestamp("devolved_at") != null ? rs.getTimestamp("devolved_at").toInstant() : null,
+        rs.getTimestamp("updated_at").toInstant()),
+        entity.getId(),
+        entity.getBookId(),
+        entity.getUserId(),
+        entity.getTakenAt(),
+        entity.getExpectedDevolution(),
+        entity.getDevolvedAt());
 
     return mapper.toDomain(persist);
   }
 
   @Override
   public Optional<Loan> findById(UUID id) {
-    String sql = "SELECT * FROM loans WHERE id = ?";
-    LoanEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new LoanEntity(
-        rs.getObject("id", UUID.class),
-        rs.getObject("bookId", UUID.class),
-        rs.getObject("userId", UUID.class),
-        rs.getTimestamp("takenAt").toInstant(),
-        rs.getTimestamp("expectedDevolution").toInstant(),
-        rs.getTimestamp("devolvedAt").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), id);
+    String sql = "SELECT * FROM fn_find_loan_by_id(?)";
 
+    List<LoanEntity> results = jdbcTempl.query(
+        sql,
+        (rs, rowNum) -> new LoanEntity(
+            rs.getObject("id", UUID.class),
+            rs.getObject("book_id", UUID.class),
+            rs.getObject("user_id", UUID.class),
+            rs.getTimestamp("taken_at").toInstant(),
+            rs.getTimestamp("expected_devolution").toInstant(),
+            rs.getTimestamp("devolved_at") != null ? rs.getTimestamp("devolved_at").toInstant() : null,
+            rs.getTimestamp("updated_at").toInstant()),
+        id);
+
+    LoanEntity entity = results.isEmpty() ? null : results.get(0);
     return Optional.ofNullable(entity).map(mapper::toDomain);
   }
 
   @Override
   public List<Loan> findAllByUserId(UUID userId) {
-    String sql = "SELECT * FROM loans WHERE userId = ?";
-    List<LoanEntity> entities = jdbcTempl.query(sql, (rs, rowNum) -> new LoanEntity(
-        rs.getObject("id", UUID.class),
-        rs.getObject("bookId", UUID.class),
-        rs.getObject("userId", UUID.class),
-        rs.getTimestamp("takenAt").toInstant(),
-        rs.getTimestamp("expectedDevolution").toInstant(),
-        rs.getTimestamp("devolvedAt").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), userId);
+    String sql = "SELECT * FROM fn_find_loans_by_user(?)";
 
-    try {
-      return entities.stream()
-          .map(mapper::toDomain)
-          .toList();
-    } catch (Exception e) {
-      throw new RuntimeException("Error mapping LoanEntity to Loan", e);
-    }
+    List<LoanEntity> entities = jdbcTempl.query(
+        sql,
+        (rs, rowNum) -> new LoanEntity(
+            rs.getObject("id", UUID.class),
+            rs.getObject("book_id", UUID.class),
+            rs.getObject("user_id", UUID.class),
+            rs.getTimestamp("taken_at").toInstant(),
+            rs.getTimestamp("expected_devolution").toInstant(),
+            rs.getTimestamp("devolved_at") != null ? rs.getTimestamp("devolved_at").toInstant() : null,
+            rs.getTimestamp("updated_at").toInstant()),
+        userId);
+
+    return entities.stream()
+        .map(mapper::toDomain)
+        .toList();
   }
 
   @Override
@@ -99,66 +94,65 @@ public class LoanRepositoryImpl implements LoanOutputPort, LoanQueryPort {
     String sql = "SELECT * FROM loans";
     List<LoanEntity> entities = jdbcTempl.query(sql, (rs, rowNum) -> new LoanEntity(
         rs.getObject("id", UUID.class),
-        rs.getObject("bookId", UUID.class),
-        rs.getObject("userId", UUID.class),
-        rs.getTimestamp("takenAt").toInstant(),
-        rs.getTimestamp("expectedDevolution").toInstant(),
-        rs.getTimestamp("devolvedAt").toInstant(),
+        rs.getObject("book_id", UUID.class),
+        rs.getObject("user_id", UUID.class),
+        rs.getTimestamp("taken_at").toInstant(),
+        rs.getTimestamp("expected_devolution").toInstant(),
+        rs.getTimestamp("devolved_at").toInstant(),
         rs.getTimestamp("updated_at").toInstant()));
 
     return entities.stream().map(mapper::toDomain).toList();
   }
 
   @Override
-  public Optional<Loan> findActiveLoan(UUID userId, UUID bookid) {
-    String sql = """
-        SELECT * FROM loans WHERE userId = ? AND bookId = ?
-        AND takenAt IS NOT NULL AND devolvedAt IS NULL
-        """;
+  public Optional<Loan> findActiveLoan(UUID userId, UUID bookId) {
+    String sql = "SELECT * FROM fn_find_active_loan(?, ?)";
 
-    LoanEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new LoanEntity(
-        rs.getObject("id", UUID.class),
-        rs.getObject("bookId", UUID.class),
-        rs.getObject("userId", UUID.class),
-        rs.getTimestamp("takenAt").toInstant(),
-        rs.getTimestamp("expectedDevolution").toInstant(),
-        rs.getTimestamp("devolvedAt").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()), userId, bookid);
+    List<LoanEntity> entities = jdbcTempl.query(
+        sql,
+        (rs, rowNum) -> new LoanEntity(
+            rs.getObject("id", UUID.class),
+            rs.getObject("book_id", UUID.class),
+            rs.getObject("user_id", UUID.class),
+            rs.getTimestamp("taken_at") != null ? rs.getTimestamp("taken_at").toInstant() : null,
+            rs.getTimestamp("expected_devolution") != null ? rs.getTimestamp("expected_devolution").toInstant() : null,
+            rs.getTimestamp("devolved_at") != null ? rs.getTimestamp("devolved_at").toInstant() : null,
+            rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toInstant() : null),
+        userId,
+        bookId);
 
-    return Optional.ofNullable(entity).map(mapper::toDomain);
+    return entities.stream().findFirst().map(mapper::toDomain);
   }
 
   @Override
   public List<Loan> findAllByDevolvedAtIsNull() {
-    String sql = "SELECT * FROM loans WHERE devolvedAt IS NULL";
-    List<LoanEntity> entities = jdbcTempl.query(sql, (rs, rowNum) -> new LoanEntity(
-        rs.getObject("id", UUID.class),
-        rs.getObject("bookId", UUID.class),
-        rs.getObject("userId", UUID.class),
-        rs.getTimestamp("takenAt").toInstant(),
-        rs.getTimestamp("expectedDevolution").toInstant(),
-        rs.getTimestamp("devolvedAt").toInstant(),
-        rs.getTimestamp("updated_at").toInstant()));
+    String sql = "SELECT * FROM fn_find_active_loans()";
 
-    return entities.stream().map(mapper::toDomain).toList();
+    List<LoanEntity> entities = jdbcTempl.query(
+        sql,
+        (rs, rowNum) -> new LoanEntity(
+            rs.getObject("id", UUID.class),
+            rs.getObject("book_id", UUID.class),
+            rs.getObject("user_id", UUID.class),
+            rs.getTimestamp("taken_at").toInstant(),
+            rs.getTimestamp("expected_devolution").toInstant(),
+            rs.getTimestamp("devolved_at").toInstant(),
+            rs.getTimestamp("updated_at").toInstant()));
+
+    return entities.stream()
+        .map(mapper::toDomain)
+        .toList();
   }
 
   @Override
   public List<LoanedBooksWithUsersReq> getAllActiveLoans() {
-    String sql = """
-        SELECT l.id, l.bookId, l.userId, l.takenAt, l.expectedDevolution, l.devolvedAt,
-               b.title AS bookTitle, b.author AS bookAuthor,
-               u.name AS userName, u.email AS userEmail
-        FROM loans l
-        JOIN books b ON l.bookId = b.id
-        JOIN users u ON l.userId = u.id
-        WHERE l.devolvedAt IS NULL
-        """;
+    String sql = "SELECT * FROM fn_get_all_active_loans()";
 
     return jdbcTempl.query(sql, (rs, rowNum) -> new LoanedBooksWithUsersReq(
-        rs.getString("bookTitle"),
-        rs.getString("bookAuthor"),
-        rs.getString("userName"),
-        rs.getString("userEmail")));
+        rs.getString("book_title"),
+        rs.getString("book_author"),
+        rs.getString("user_name"),
+        rs.getString("user_email")));
   }
+
 }
