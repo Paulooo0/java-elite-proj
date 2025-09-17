@@ -73,7 +73,7 @@ public class UserRepositoryImpl implements UserOutputPort {
 
   @Override
   public boolean existsByEmail(String email) {
-    String sql = "SELECT fn_exists_user_by_email(?)";
+    String sql = "SELECT * FROM fn_exists_user_by_email(?)";
     Boolean exists = jdbcTempl.queryForObject(sql, Boolean.class, email);
     return Boolean.TRUE.equals(exists);
   }

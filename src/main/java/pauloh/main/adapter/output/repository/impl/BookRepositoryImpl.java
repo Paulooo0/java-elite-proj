@@ -26,7 +26,7 @@ public class BookRepositoryImpl implements BookOutputPort {
   public Book save(Book book) {
     BookEntity entity = mapper.toEntity(book);
 
-    String sql = "SELECT 1 FROM fn_upsert_book(?, ?, ?, ?)";
+    String sql = "SELECT * FROM fn_upsert_book(?, ?, ?, ?)";
 
     BookEntity persisted = jdbcTempl.queryForObject(
         sql,
@@ -56,7 +56,7 @@ public class BookRepositoryImpl implements BookOutputPort {
 
   @Override
   public Optional<Book> findById(UUID id) {
-    String sql = "SELECT 1 FROM fn_find_book_by_id(?)";
+    String sql = "SELECT * FROM fn_find_book_by_id(?)";
 
     try {
       BookEntity entity = jdbcTempl.queryForObject(
@@ -80,7 +80,7 @@ public class BookRepositoryImpl implements BookOutputPort {
 
   @Override
   public Optional<Book> findByIsbn(String isbn) {
-    String sql = "SELECT 1 FROM fn_find_book_by_isbn(?)";
+    String sql = "SELECT * FROM fn_find_book_by_isbn(?)";
 
     try {
       BookEntity entity = jdbcTempl.queryForObject(sql, (rs, rowNum) -> new BookEntity(
